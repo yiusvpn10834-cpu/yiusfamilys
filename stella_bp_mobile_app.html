@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- 讓網頁在手機上更像一個 App -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Stella血壓">
+    <title>Stella 血壓心率紀錄</title>
+    <style>
+        :root {
+            --primary: #c05621; /* 換一隻顏色區分，用暖橙色 */
+            --danger: #e53e3e;
+            --bg: #f4f4f5;
+            --card: #ffffff;
+        }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { margin: 0; padding: 15px; background-color: var(--bg); color: #333; -webkit-tap-highlight-color: transparent; }
+        
+        .header { text-align: center; margin-bottom: 15px; }
+        .header h1 { margin: 0; font-size: 20px; color: #7b341e; }
+        
+        /* 輸入區卡片 */
+        .input-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        
+        /* 早上/晚上 切換按鈕 */
+        .time-toggle {
+            display: flex;
+            background: #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        .time-toggle button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: none;
+            font-size: 16px;
+            font-weight: bold;
+            color: #64748b;
+            transition: 0.2s;
+        }
+        .time-toggle button.active-am { background: #fef08a; color: #854d0e; }
+        .time-toggle button.active-pm { background: #1e293b; color: #f8fafc; }
+
+        /* 數字輸入框設計 - 極大化，方便手指點擊 */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .input-box {
+            flex: 1;
+            text-align: center;
+        }
+        .input-box label {
+            display: block;
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .input-box input {
+            width: 100%;
+            padding: 15px 0;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f8fafc;
+            /* 喚起手機純數字鍵盤 */
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        .input-box input:focus {
+            border-color: var(--primary);
+            outline: none;
+            background: #fff;
+        }
+
+        /* 備註輸入 */
+        .note-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
+            margin-bottom: 15px;
+            background: #f8fafc;
+        }
+
+        /* 特大儲存按鈕 */
+        .btn-save {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(192, 86, 33, 0.2);
+        }
+        .btn-save:active { transform: scale(0.98); }
+
+        /* 歷史紀錄區 */
+        .history-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+        .history-header h2 { margin: 0; font-size: 16px; }
+        .btn-export {
+            background: #4a5568;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .record-list { list-style: none; padding: 0; margin: 0; max-height: 40vh; overflow-y: auto;}
+        .record-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .record-date { font-size: 13px; color: #64748b; }
+        .record-data { font-size: 16px; font-weight: bold; }
+        .high-bp { color: var(--danger); }
+        .del-btn { background: none; border: none; color: #cbd5e1; font-size: 18px; padding: 0 5px;}
+
+        /* 提示動畫 */
+        #toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #38a169;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        #toast.show { opacity: 1; }
+    </style>
+</head>
+<body>
+
+<div id="toast">✅ 已成功記錄！</div>
+
+<div class="header">
+    <h1>Stella 血壓心率紀錄 App</h1>
+</div>
+
+<div class="input-card">
+    <div class="time-toggle">
+        <button id="btn-am" onclick="setTime('am')">☀️ 早上</button>
+        <button id="btn-pm" onclick="setTime('pm')">🌙 晚上</button>
+    </div>
+
+    <div class="input-group">
+        <div class="input-box">
+            <label>上壓 (SYS)</label>
+            <input type="number" id="sys" inputmode="numeric" pattern="[0-9]*" placeholder="---">
+        </div>
+        <div class="input-box">
+            <label>下壓 (DIA)</label>
+            <input type="number" id="dia" inputmode="numeric" pattern="[0-9]*" placeholder="---">
+        </div>
+        <div class="input-box">
+            <label>心跳 (HR)</label>
+            <input type="number" id="pul" inputmode="numeric" pattern="[0-9]*" placeholder="---">
+        </div>
+    </div>
+    
+    <input type="text" id="note" class="note-input" placeholder="備註 (例如: 剛運動完/有頭暈)...">
+    
+    <button class="btn-save" onclick="saveRecord()">📥 一鍵記錄</button>
+</div>
+
+<div class="history-card">
+    <div class="history-header">
+        <h2>最近紀錄</h2>
+        <button class="btn-export" onclick="exportData()">🖨️ 顯示完整報表</button>
+    </div>
+    <ul class="record-list" id="recordList">
+        <!-- 紀錄會顯示在這裡 -->
+    </ul>
+</div>
+
+<script>
+    // 更改了 Storage Key，確保不會和 Ryan 的數據混淆！
+    const STORAGE_KEY = 'stella_bp_mobile_data';
+    let currentTimeType = 'am';
+
+    function autoSetTime() {
+        const hour = new Date().getHours();
+        if (hour >= 4 && hour < 15) {
+            setTime('am');
+        } else {
+            setTime('pm');
+        }
+    }
+
+    function setTime(type) {
+        currentTimeType = type;
+        const btnAm = document.getElementById('btn-am');
+        const btnPm = document.getElementById('btn-pm');
+        if (type === 'am') {
+            btnAm.classList.add('active-am');
+            btnPm.classList.remove('active-pm');
+        } else {
+            btnPm.classList.add('active-pm');
+            btnAm.classList.remove('active-am');
+        }
+    }
+
+    function showToast() {
+        const toast = document.getElementById('toast');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    function saveRecord() {
+        const sys = document.getElementById('sys').value;
+        const dia = document.getElementById('dia').value;
+        const pul = document.getElementById('pul').value;
+        const note = document.getElementById('note').value;
+
+        if (!sys && !dia && !pul) return; 
+
+        const now = new Date();
+        const dateStr = (now.getMonth() + 1) + '/' + now.getDate();
+        
+        const newRecord = {
+            id: Date.now(),
+            date: dateStr,
+            timeType: currentTimeType,
+            sys: sys,
+            dia: dia,
+            pul: pul,
+            note: note
+        };
+
+        let records = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        records.unshift(newRecord); 
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+
+        document.getElementById('sys').value = '';
+        document.getElementById('dia').value = '';
+        document.getElementById('pul').value = '';
+        document.getElementById('note').value = '';
+        
+        document.getElementById('sys').blur();
+
+        showToast();
+        renderList();
+    }
+
+    function deleteRecord(id) {
+        if(confirm('確定要刪除這筆紀錄嗎？')) {
+            let records = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            records = records.filter(r => r.id !== id);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+            renderList();
+        }
+    }
+
+    function renderList() {
+        const list = document.getElementById('recordList');
+        const records = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        
+        list.innerHTML = '';
+        
+        if (records.length === 0) {
+            list.innerHTML = '<li style="text-align:center; color:#94a3b8; padding: 20px;">尚無紀錄，請輸入今日數據</li>';
+            return;
+        }
+
+        records.forEach(r => {
+            const isHigh = (r.sys >= 130 || r.dia >= 80);
+            const dataClass = isHigh ? 'record-data high-bp' : 'record-data';
+            const icon = r.timeType === 'am' ? '☀️' : '🌙';
+            const noteStr = r.note ? `<br><small style="color:#94a3b8">${r.note}</small>` : '';
+
+            const li = document.createElement('li');
+            li.className = 'record-item';
+            li.innerHTML = `
+                <div>
+                    <div class="record-date">${r.date} ${icon}</div>
+                    ${noteStr}
+                </div>
+                <div class="${dataClass}">
+                    ${r.sys || '-'} / ${r.dia || '-'} <small style="color:#94a3b8; font-size:12px;">(心率: ${r.pul || '-'})</small>
+                </div>
+                <button class="del-btn" onclick="deleteRecord(${r.id})">×</button>
+            `;
+            list.appendChild(li);
+        });
+    }
+
+    function exportData() {
+        const records = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        let html = '<html lang="zh-Hant"><head><title>Stella 血壓心率完整報表</title><style>body{font-family:sans-serif; padding:20px;} table{width:100%; border-collapse:collapse;} th,td{border:1px solid #ccc; padding:8px; text-align:center;} th{background:#f0f0f0;}</style></head><body>';
+        html += '<h2>Stella 血壓心率完整報表</h2>';
+        html += '<button onclick="window.print()" style="padding:10px; margin-bottom:20px;">🖨️ 列印報表</button>';
+        html += '<table><tr><th>日期</th><th>時段</th><th>上壓</th><th>下壓</th><th>心跳 (HR)</th><th>備註</th></tr>';
+        
+        const sortedRecords = [...records].reverse();
+        
+        sortedRecords.forEach(r => {
+            const timeStr = r.timeType === 'am' ? '早上' : '晚上';
+            html += `<tr><td>${r.date}</td><td>${timeStr}</td><td>${r.sys}</td><td>${r.dia}</td><td>${r.pul}</td><td>${r.note}</td></tr>`;
+        });
+        
+        html += '</table></body></html>';
+        
+        const newWin = window.open('', '_blank');
+        newWin.document.write(html);
+        newWin.document.close();
+    }
+
+    window.onload = () => {
+        autoSetTime();
+        renderList();
+    };
+</script>
+</body>
+</html>
