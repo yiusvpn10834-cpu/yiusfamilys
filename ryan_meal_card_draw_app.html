@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ryan餐單抽卡">
+<meta name="theme-color" content="#0f766e">
+<title>Ryan 健康餐單抽卡</title>
+<style>
+:root{
+  --bg:#f6fbf9; --ink:#15353f; --muted:#5c7280; --teal:#0f766e; --green:#22a06b;
+  --orange:#f59e0b; --soft:#e6f6f2; --soft2:#fff5df; --card:#ffffff; --shadow:0 16px 38px rgba(16,64,68,.14);
+  --radius:28px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;color:var(--ink);background:
+radial-gradient(circle at top left,#dff8ee 0,transparent 34%),
+radial-gradient(circle at top right,#ffe9b7 0,transparent 28%),
+linear-gradient(180deg,#f6fbf9,#eef8f4 60%,#fffaf0);}
+body{padding:18px;padding-bottom:34px;}
+.app{max-width:1220px;margin:0 auto;}
+.hero{
+  border-radius:34px;padding:24px; background:rgba(255,255,255,.78); backdrop-filter:blur(14px);
+  box-shadow:var(--shadow); border:1px solid rgba(255,255,255,.8); position:relative; overflow:hidden;
+}
+.hero:before{content:"";position:absolute;right:-50px;top:-65px;width:190px;height:190px;background:#c8f1dd;border-radius:50%;opacity:.75}
+.hero:after{content:"";position:absolute;left:-55px;bottom:-75px;width:190px;height:190px;background:#ffe4a3;border-radius:50%;opacity:.55}
+.hero-inner{position:relative;z-index:1}
+h1{margin:0;font-size:clamp(31px,5vw,56px);letter-spacing:-.04em;line-height:1.03}
+.subtitle{font-size:18px;color:var(--muted);margin:10px 0 0;line-height:1.55}
+.badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.badge{background:var(--soft);color:var(--teal);font-weight:800;border-radius:999px;padding:9px 13px;font-size:14px}
+.badge.orange{background:var(--soft2);color:#9a5a00}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+button{
+  appearance:none;border:0;border-radius:999px;padding:12px 18px;font-size:16px;font-weight:900;
+  color:#fff;background:linear-gradient(135deg,var(--teal),var(--green));box-shadow:0 10px 22px rgba(15,118,110,.22);cursor:pointer;
+}
+button.secondary{background:#fff;color:var(--teal);border:1px solid #cce9e1;box-shadow:none}
+button.orange{background:linear-gradient(135deg,#f59e0b,#fb7185)}
+button:active{transform:translateY(1px) scale(.99)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+.panel{
+  background:rgba(255,255,255,.86);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;border:1px solid rgba(255,255,255,.85);
+}
+.panel.lunch{background:rgba(255,252,244,.9)}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.panel-title{font-size:24px;font-weight:950;display:flex;align-items:center;gap:10px}
+.emoji{width:42px;height:42px;display:grid;place-items:center;border-radius:15px;background:var(--soft);font-size:24px}
+.lunch .emoji{background:var(--soft2)}
+.small{font-size:13px;color:var(--muted);font-weight:700}
+.card{
+  min-height:560px;border-radius:24px;padding:18px;background:#fff;border:1px solid #e5f1ee;position:relative;overflow:hidden;
+  transition:transform .45s ease, box-shadow .45s ease; box-shadow:0 6px 16px rgba(16,64,68,.07);
+}
+.card.drawn{animation:pop .55s cubic-bezier(.2,1.35,.35,1)}
+@keyframes pop{0%{transform:scale(.96) rotate(-1deg);opacity:.65}70%{transform:scale(1.018) rotate(.3deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+.number{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;background:#effaf6;color:var(--teal);border-radius:999px;font-weight:950;font-size:14px}
+.meal-title{font-size:28px;font-weight:950;margin:12px 0 8px;line-height:1.18;letter-spacing:-.03em}
+.soup{background:#fff7e6;border:1px solid #ffe1a6;border-radius:16px;padding:11px 13px;margin:12px 0;font-weight:850;color:#744500}
+.section{margin-top:14px}
+.section h3{font-size:16px;margin:0 0 8px;color:var(--teal);display:flex;align-items:center;gap:6px}
+ul,ol{margin:0;padding-left:22px}
+li{margin:5px 0;line-height:1.45}
+.tip{background:#effaf6;border-left:5px solid var(--green);border-radius:16px;padding:12px 13px;margin-top:14px;font-weight:750;line-height:1.55}
+.empty{
+  min-height:560px;display:grid;place-items:center;text-align:center;color:var(--muted);padding:20px;background:linear-gradient(180deg,#fff,#f3fbf8);border-radius:24px;border:1px dashed #b8ddd2;
+}
+.empty strong{display:block;font-size:26px;color:var(--teal);margin-bottom:8px}
+.history{margin-top:16px;background:rgba(255,255,255,.75);border-radius:24px;padding:16px;box-shadow:0 8px 22px rgba(16,64,68,.08)}
+.history h2{margin:0 0 10px;font-size:20px}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{background:#fff;border:1px solid #ddeee9;border-radius:999px;padding:7px 10px;font-size:13px;font-weight:800;color:#31545d}
+.library{margin-top:16px;display:none}
+.library.show{display:block}
+.library-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.mini-card{background:#fff;border-radius:20px;padding:14px;border:1px solid #e3eee9;box-shadow:0 6px 12px rgba(16,64,68,.05)}
+.mini-card h4{margin:0 0 8px;font-size:16px}
+.mini-card p{margin:4px 0;color:var(--muted);font-size:13px;line-height:1.45}
+.footer-note{margin:18px 0 0;text-align:center;color:var(--muted);font-size:14px;line-height:1.5}
+@media(max-width:850px){
+  body{padding:12px}
+  .hero{padding:20px;border-radius:28px}
+  .grid{grid-template-columns:1fr}
+  .card,.empty{min-height:unset}
+  .library-grid{grid-template-columns:1fr}
+  button{flex:1}
+  .meal-title{font-size:24px}
+}
+@media print{
+  body{background:white;padding:0}
+  .controls,.history,.library,.footer-note{display:none!important}
+  .hero{box-shadow:none;border:0}
+  .grid{grid-template-columns:1fr 1fr}
+  .panel{box-shadow:none;border:1px solid #ddd}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <section class="hero">
+    <div class="hero-inner">
+      <h1>Ryan 健康餐單抽卡</h1>
+      <p class="subtitle">一邊抽晚餐，一邊抽午餐。少鹽少油、無魚版本，Ryan 可以帶飯，兩個女放假都可以跟住食。</p>
+      <div class="badges">
+        <span class="badge">🍱 30個晚餐</span>
+        <span class="badge orange">☀️ 20個午餐</span>
+        <span class="badge">💚 少鹽少糖少油</span>
+        <span class="badge">📱 iPhone / iPad 可用</span>
+      </div>
+      <div class="controls">
+        <button onclick="drawBoth()">一次抽晒</button>
+        <button class="secondary" onclick="drawDinner()">只抽晚餐</button>
+        <button class="secondary" onclick="drawLunch()">只抽午餐</button>
+        <button class="orange" onclick="resetDraws()">洗牌重抽</button>
+        <button class="secondary" onclick="toggleLibrary()">睇晒餐單</button>
+      </div>
+    </div>
+  </section>
+
+  <main class="grid">
+    <section class="panel dinner">
+      <div class="panel-head">
+        <div class="panel-title"><span class="emoji">🌙</span> 晚餐卡</div>
+        <div class="small" id="dinner-count"></div>
+      </div>
+      <div id="dinner-card" class="empty"><div><strong>今晚煮乜好？</strong>撳「只抽晚餐」或「一次抽晒」</div></div>
+    </section>
+
+    <section class="panel lunch">
+      <div class="panel-head">
+        <div class="panel-title"><span class="emoji">☀️</span> 午餐卡</div>
+        <div class="small" id="lunch-count"></div>
+      </div>
+      <div id="lunch-card" class="empty"><div><strong>放假 Lunch 食乜？</strong>撳「只抽午餐」或「一次抽晒」</div></div>
+    </section>
+  </main>
+
+  <section class="history">
+    <h2>最近抽過</h2>
+    <div class="pills" id="history-pills"><span class="pill">未開始抽卡</span></div>
+  </section>
+
+  <section class="library" id="library">
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title"><span class="emoji">📚</span> 全部餐單</div>
+        <div class="small">可截圖或列印</div>
+      </div>
+      <div class="library-grid" id="library-grid"></div>
+    </div>
+  </section>
+
+  <p class="footer-note">小提醒：Ryan 嗰份先夾起，記住「多菜、蛋白質夠、飯少啲、少汁」。10:30pm 後停止零食會更幫到血壓同血糖。</p>
+</div>
+
+<script>
+const dinners = [{"id": 1, "title": "洋蔥雞柳＋西蘭花＋番茄蛋", "soup": "粟米紅蘿蔔瘦肉湯", "ingredients": ["雞柳/雞胸 2塊", "洋蔥 1個", "西蘭花 1棵", "番茄 2個", "雞蛋 3隻", "粟米 1條", "紅蘿蔔 1條", "瘦肉少量"], "steps": ["雞柳用蒜蓉、黑椒、少少豉油醃10分鐘。", "少油煎熟雞柳，加洋蔥炒香。", "西蘭花灼熟或少油炒；番茄炒軟後加蛋炒熟。", "粟米、紅蘿蔔、瘦肉加水煲45–60分鐘，最後少少鹽。"], "ryan": "飯半碗至1碗，雞柳多啲，西蘭花放半盒，雞汁另放。"}, {"id": 2, "title": "蒸豆腐肉碎＋灼菜心＋炒雜菇", "soup": "節瓜瘦肉湯", "ingredients": ["硬豆腐 1–2盒", "免治瘦肉 200g", "菜心 1斤", "鮮菇/本菇/冬菇 1包", "節瓜 1個", "瘦肉少量"], "steps": ["豆腐鋪碟，瘦肉用少少豉油、胡椒粉、生粉醃。", "肉碎鋪上豆腐，蒸10–12分鐘。", "菜心灼熟；雜菇用蒜蓉少油炒。", "節瓜切件，瘦肉汆水，加水煲45分鐘。"], "ryan": "肉碎唔好太多汁，豆腐＋菜心＋雜菇，飯少啲。"}, {"id": 3, "title": "蝦仁炒蛋＋翠玉瓜菇", "soup": "番茄薯仔蛋花湯", "ingredients": ["蝦仁 250g", "雞蛋 3隻", "翠玉瓜 2條", "菇 1包", "番茄 2個", "薯仔 1個", "雞蛋 1隻做湯"], "steps": ["蝦仁灼一灼或炒熟，再加蛋炒。", "翠玉瓜切片，加菇少油炒。", "番茄、薯仔煲20–30分鐘，最後落蛋花。"], "ryan": "如果湯有薯仔，飯就減少少；如果唔食蝦，可改雞粒或豆腐。"}, {"id": 4, "title": "香草去皮雞扒＋椰菜甘筍＋蒸水蛋", "soup": "冬瓜瘦肉湯", "ingredients": ["去皮雞扒 2–3塊", "椰菜 半個", "甘筍 1條", "雞蛋 3隻", "冬瓜 1斤", "瘦肉少量"], "steps": ["雞扒用蒜蓉、黑椒、香草、檸檬汁醃。", "少油煎或焗雞扒。", "椰菜甘筍炒軟；雞蛋加暖水蒸成水蛋。", "冬瓜、瘦肉煲45分鐘，少鹽。"], "ryan": "雞扒去皮，醬汁另放；水蛋可帶少量。"}, {"id": 5, "title": "番茄豆腐＋瘦肉娃娃菜＋烚蛋", "soup": "白蘿蔔粟米湯", "ingredients": ["番茄 3個", "豆腐 1–2盒", "瘦肉片 200g", "娃娃菜 2棵", "雞蛋 3隻", "白蘿蔔 半條", "粟米 1條"], "steps": ["番茄炒出汁，加豆腐炆5–8分鐘。", "瘦肉片用少少豉油醃，炒娃娃菜。", "雞蛋烚熟。", "白蘿蔔、粟米加水煲45分鐘；想甜味可加少量瘦肉。"], "ryan": "番茄豆腐汁唔好太多，避免撈飯食多咗。"}, {"id": 6, "title": "瘦肉雜菇＋蒜蓉白菜＋涼拌青瓜", "soup": "西洋菜瘦肉湯", "ingredients": ["瘦肉片/豬柳 250g", "雜菇 2包", "白菜 1斤", "青瓜 1條", "西洋菜 1斤", "瘦肉少量"], "steps": ["瘦肉片用胡椒、生粉、少少豉油醃，炒雜菇。", "白菜蒜蓉炒或灼。", "青瓜切條，加少少醋、芝麻油拌。", "西洋菜、瘦肉煲45–60分鐘，最後少鹽。"], "ryan": "雜菇多啲，豬肉掌心大份量就夠。"}, {"id": 7, "title": "三色椒雞胸＋番茄炒蛋＋灼生菜", "soup": "紫菜豆腐蛋花湯", "ingredients": ["雞胸 2塊", "三色椒各半個", "番茄 2個", "蛋 3隻", "生菜 1個", "紫菜 1片", "豆腐 1盒"], "steps": ["雞胸切條，用蒜、黑椒、少少豉油醃，炒三色椒。", "番茄炒蛋；生菜灼熟。", "水滾落豆腐、紫菜，最後落蛋花，少鹽。"], "ryan": "呢款好啱跑步日，蛋白質足夠，飯不用太多。"}, {"id": 8, "title": "冬菇蒸瘦肉餅＋西蘭花＋節瓜少粉絲", "soup": "合掌瓜紅蘿蔔瘦肉湯", "ingredients": ["免治瘦肉 250g", "冬菇 3–4隻", "西蘭花 1棵", "節瓜 1個", "粉絲 半扎", "合掌瓜 1個", "紅蘿蔔 1條", "瘦肉少量"], "steps": ["瘦肉餅加冬菇粒、少少豉油、生粉、水，蒸12–15分鐘。", "西蘭花灼熟。", "節瓜切片炆，粉絲只落少少。", "合掌瓜、紅蘿蔔、瘦肉煲45–60分鐘。"], "ryan": "肉餅唔加梅菜、鹹蛋，因為太鹹。"}, {"id": 9, "title": "雞肉豆腐菇菌煲＋灼菜心", "soup": "番茄椰菜湯", "ingredients": ["雞腿肉去皮/雞胸 250g", "豆腐 1盒", "菇 1–2包", "菜心 1斤", "番茄 2個", "椰菜 半個"], "steps": ["雞肉切件，少油煎香。", "加菇、豆腐和少量水炆熟。", "菜心灼熟。", "番茄、椰菜、洋蔥少量煲30–40分鐘，少鹽。"], "ryan": "煲仔汁另放，飯半碗至1碗。"}, {"id": 10, "title": "瘦牛肉西蘭花＋蒸水蛋＋青瓜條", "soup": "冬瓜薏米瘦肉湯", "ingredients": ["瘦牛肉 200g", "西蘭花 1棵", "雞蛋 3隻", "青瓜 1條", "冬瓜 1斤", "薏米少量", "瘦肉少量"], "steps": ["牛肉用少少豉油、胡椒、生粉醃，快炒西蘭花。", "蒸水蛋；青瓜切條。", "薏米少量先浸，冬瓜、瘦肉煲60分鐘。"], "ryan": "牛肉一星期1次左右就好，唔需要日日食。"}, {"id": 11, "title": "蝦仁扒豆腐＋小棠菜＋番茄蛋", "soup": "粟米豆腐蛋花湯", "ingredients": ["蝦仁 250g", "豆腐 1–2盒", "小棠菜 1斤", "番茄 2個", "蛋 3隻", "粟米 1條", "豆腐 半盒做湯"], "steps": ["蝦仁炒熟，加豆腐輕輕炆。", "小棠菜灼熟；番茄炒蛋。", "粟米粒、豆腐煲15–20分鐘，最後蛋花。"], "ryan": "豆腐＋蝦夠飽，飯可以半碗至三分二碗；唔食蝦就改雞柳粒。"}, {"id": 12, "title": "雞柳番茄全麥意粉＋沙律菜＋烚蛋", "soup": "南瓜粟米湯", "ingredients": ["全麥意粉", "雞柳 2塊", "番茄 3個", "洋蔥 半個", "沙律菜 1包", "雞蛋 3隻", "南瓜 1小件", "粟米 半條"], "steps": ["意粉煮熟。", "番茄洋蔥煮成醬，加雞柳粒。", "沙律菜洗淨，蛋烚熟。", "南瓜、粟米煲30分鐘，可攪碎成湯，不加忌廉。"], "ryan": "意粉一個拳頭份量左右，沙律菜另盒放，醬汁少啲。"}, {"id": 13, "title": "鷹嘴豆雞肉粒＋炒椰菜＋蒸蛋", "soup": "番茄紅蘿蔔洋蔥湯", "ingredients": ["雞肉粒 250g", "鷹嘴豆 1罐/熟豆 1碗", "椰菜 半個", "雞蛋 3隻", "番茄 2個", "紅蘿蔔 1條", "洋蔥 半個"], "steps": ["鷹嘴豆罐頭沖水減鈉。", "雞肉粒炒香，加鷹嘴豆同少量番茄炆。", "椰菜炒熟；蒸蛋。", "番茄、紅蘿蔔、洋蔥切件煲30–40分鐘。"], "ryan": "鷹嘴豆有碳水，所以飯要減少少。"}, {"id": 14, "title": "瘦肉蒸蛋＋油麥菜＋菇菌翠玉瓜", "soup": "節瓜豆腐湯", "ingredients": ["瘦肉碎 200g", "雞蛋 4隻", "油麥菜 1斤", "翠玉瓜 2條", "菇 1包", "節瓜 1個", "豆腐 1盒"], "steps": ["瘦肉碎鋪底，加蛋液蒸熟。", "油麥菜灼或炒。", "菇菌翠玉瓜少油炒。", "節瓜、豆腐煲20–30分鐘，少鹽。"], "ryan": "蒸蛋好適合帶飯，但湯汁不要太多。"}, {"id": 15, "title": "黑椒雞扒＋番薯＋西蘭花椰菜花", "soup": "冬瓜海帶湯", "ingredients": ["去皮雞扒 2–3塊", "番薯 2條", "西蘭花 1棵", "椰菜花 1棵", "海帶少量", "冬瓜 1斤"], "steps": ["雞扒用黑椒、蒜蓉、檸檬汁醃，煎或焗。", "番薯蒸熟。", "西蘭花、椰菜花灼熟。", "冬瓜、海帶煲30–45分鐘；海帶不要太多。"], "ryan": "有番薯就可以唔帶飯，或者只帶幾啖飯。"}, {"id": 16, "title": "蝦仁雜菜＋豆腐蒸蛋＋青瓜車厘茄", "soup": "白蘿蔔瘦肉湯", "ingredients": ["蝦仁 250g", "雜菜如西蘭花/甘筍/少量粟米粒", "豆腐 1盒", "雞蛋 3隻", "青瓜 1條", "車厘茄 1盒", "白蘿蔔 半條", "瘦肉少量"], "steps": ["蝦仁炒雜菜。", "豆腐加蛋液蒸熟。", "青瓜車厘茄洗淨切好。", "白蘿蔔、瘦肉煲45分鐘。"], "ryan": "清爽，適合午餐；唔食蝦就轉雞胸粒。"}, {"id": 17, "title": "少油肉碎茄子＋灼生菜＋番茄蛋", "soup": "粟米紅蘿蔔蘋果瘦肉湯", "ingredients": ["茄子 2條", "免治瘦肉 200g", "生菜 1個", "番茄 2個", "蛋 3隻", "粟米 1條", "紅蘿蔔 1條", "蘋果 1個", "瘦肉少量"], "steps": ["茄子先蒸軟或焗軟，再用少油加肉碎炆。", "生菜灼熟。", "番茄炒蛋。", "湯料煲60分鐘，少鹽或不加鹽。"], "ryan": "茄子好吸油，唔好用油炸。"}, {"id": 18, "title": "雞肉菇菌少汁燴飯＋大份灼菜＋烚蛋", "soup": "紫菜番茄豆腐湯", "ingredients": ["雞肉 250g", "菇 2包", "米飯", "菜心/白菜 1斤", "雞蛋 3隻", "紫菜 1片", "番茄 2個", "豆腐 1盒"], "steps": ["雞肉菇菌煮成少汁餸，淋少量在飯上。", "菜灼熟；蛋烚熟。", "番茄、豆腐煲15–20分鐘，落紫菜，少鹽。"], "ryan": "燴飯汁要少，飯唔好超過1碗。"}, {"id": 19, "title": "家常豆腐少油版＋炒白菜＋水煮蛋", "soup": "南瓜紅蘿蔔湯", "ingredients": ["豆腐 2盒", "瘦肉片少量或全素", "白菜 1斤", "雞蛋 4隻", "南瓜 1小件", "紅蘿蔔 1條"], "steps": ["豆腐煎香或直接炆，加入少量瘦肉片/菇菌。", "白菜炒或灼。", "雞蛋水煮。", "南瓜、紅蘿蔔煲30–40分鐘，可攪成湯。"], "ryan": "半素一餐好適合，飯可以少少，菜放多啲。"}, {"id": 20, "title": "去皮豉油雞少汁版＋菜心＋番茄炒蛋", "soup": "老黃瓜瘦肉湯", "ingredients": ["雞髀/雞扒去皮 2–3件", "菜心 1斤", "番茄 2個", "蛋 3隻", "老黃瓜 1個", "瘦肉少量", "紅蘿蔔 1條"], "steps": ["雞肉用少量生抽、薑、蒜、水炆熟，不要收成濃汁。", "菜心灼熟。", "番茄炒蛋。", "老黃瓜、紅蘿蔔、瘦肉煲60分鐘。"], "ryan": "雞皮唔食，豉油汁另放，只淋少少。"}, {"id": 21, "title": "雞肉南瓜豆腐煲＋炒生菜", "soup": "番茄洋蔥椰菜湯", "ingredients": ["雞胸/雞髀肉去皮 250g", "南瓜 1小件", "硬豆腐 1盒", "生菜 1個", "菇菌 1包", "番茄 2個", "洋蔥 半個", "椰菜 半個"], "steps": ["雞肉切件，用蒜蓉、黑椒、少少豉油醃10分鐘。", "南瓜切件先蒸/煮軟。", "少油炒雞肉，加豆腐、南瓜、菇菌和少量水炆8–10分鐘。", "番茄、洋蔥、椰菜加水煲30–40分鐘。"], "ryan": "南瓜有澱粉，飯要減少少；汁不要太多。"}, {"id": 22, "title": "瘦肉蓮藕餅＋西蘭花＋番茄炒蛋", "soup": "冬瓜紅蘿蔔瘦肉湯", "ingredients": ["免治瘦肉 250g", "蓮藕半節", "西蘭花 1棵", "番茄 2個", "雞蛋 3隻", "冬瓜 1斤", "紅蘿蔔 1條", "瘦肉少量"], "steps": ["蓮藕刨碎，加入免治瘦肉、少少豉油、胡椒粉、生粉拌勻。", "壓成小肉餅，少油煎熟或蒸熟。", "西蘭花灼熟；番茄炒蛋少油。", "冬瓜、紅蘿蔔、瘦肉煲45–60分鐘。"], "ryan": "蓮藕餅可帶2–3件，西蘭花放多啲，飯半碗至三分二碗。"}, {"id": 23, "title": "雞絲涼拌蕎麥麵＋烚蛋＋青瓜", "soup": "紫菜番茄豆腐湯", "ingredients": ["蕎麥麵", "雞胸 2塊", "青瓜 1條", "甘筍 1條", "雞蛋 3隻", "豆腐 1盒", "紫菜 1片", "番茄 2個"], "steps": ["雞胸烚熟撕成雞絲。", "蕎麥麵煮熟過冷河。", "青瓜、甘筍切絲，用少量低鹽豉油/醋/芝麻油拌勻。", "番茄、豆腐煲15分鐘，落紫菜，最後少鹽。"], "ryan": "蕎麥麵一個拳頭份量左右，雞絲多啲，醬汁另放。"}, {"id": 24, "title": "蒜香蝦仁翠玉瓜＋蒸水蛋＋灼菜心", "soup": "白蘿蔔粟米瘦肉湯", "ingredients": ["蝦仁 250g", "翠玉瓜 2條", "雞蛋 4隻", "菜心 1斤", "白蘿蔔半條", "粟米 1條", "瘦肉少量"], "steps": ["蝦仁用蒜蓉少油炒熟，加翠玉瓜片炒至軟。", "雞蛋加暖水蒸成水蛋。", "菜心灼熟。", "白蘿蔔、粟米、瘦肉煲45–60分鐘。"], "ryan": "如果唔想食蝦，可改雞胸粒；水蛋少汁帶飯比較好。"}, {"id": 25, "title": "雞肉粟米粒炒蛋＋椰菜＋青瓜車厘茄", "soup": "節瓜豆腐湯", "ingredients": ["雞胸/雞柳 250g", "粟米粒半碗", "雞蛋 3隻", "椰菜半個", "青瓜 1條", "車厘茄 1盒", "節瓜 1個", "豆腐 1盒"], "steps": ["雞肉切粒，少油炒熟，加粟米粒和蛋炒成滑蛋。", "椰菜少油炒軟。", "青瓜車厘茄洗淨切好。", "節瓜、豆腐煲20–30分鐘，少鹽。"], "ryan": "粟米都係澱粉，飯可以少啲；椰菜放多啲。"}, {"id": 26, "title": "瘦肉金菇白菜卷＋番茄豆腐", "soup": "老黃瓜紅蘿蔔瘦肉湯", "ingredients": ["免治瘦肉 250g", "金菇 1包", "大白菜/娃娃菜 2棵", "番茄 3個", "豆腐 1盒", "老黃瓜 1個", "紅蘿蔔 1條", "瘦肉少量"], "steps": ["白菜葉灼軟，包入瘦肉碎和金菇。", "蒸12–15分鐘。", "番茄炒軟，加豆腐炆5分鐘。", "老黃瓜、紅蘿蔔、瘦肉煲60分鐘。"], "ryan": "白菜卷好適合帶飯，汁少啲；番茄豆腐不要撈太多汁。"}, {"id": 27, "title": "黑椒雞柳雜菇＋西芹甘筍＋烚蛋", "soup": "南瓜紅蘿蔔洋蔥湯", "ingredients": ["雞柳 250g", "雜菇 2包", "西芹 2–3條", "甘筍 1條", "雞蛋 3隻", "南瓜 1小件", "紅蘿蔔 1條", "洋蔥 半個"], "steps": ["雞柳用黑椒、蒜蓉、少少豉油醃，炒雜菇。", "西芹、甘筍切片快炒。", "雞蛋烚熟。", "南瓜、紅蘿蔔、洋蔥煲30–40分鐘，可攪碎，不加忌廉。"], "ryan": "如果帶南瓜湯，飯減少少；雞柳同菇可以多放。"}, {"id": 28, "title": "豆腐雞蛋炒雜菜＋瘦肉片白菜", "soup": "番茄粟米蛋花湯", "ingredients": ["硬豆腐 1盒", "雞蛋 3隻", "雜菜如西蘭花/椰菜花/甘筍", "瘦肉片 200g", "白菜 1斤", "番茄 2個", "粟米半條"], "steps": ["豆腐切粒煎香或直接炒，加入蛋和雜菜。", "瘦肉片用少少豉油、胡椒、生粉醃，炒白菜。", "番茄、粟米煲20分鐘，最後加蛋花。"], "ryan": "豆腐蛋已經有蛋白質，飯不用太多，菜放半盒。"}, {"id": 29, "title": "雞胸肉生菜包＋番薯＋蒸蛋", "soup": "冬瓜瘦肉湯", "ingredients": ["雞胸 2塊", "生菜 1個", "洋蔥半個", "甘筍 1條", "菇菌 1包", "番薯 2條", "雞蛋 3隻", "冬瓜 1斤", "瘦肉少量"], "steps": ["雞胸切碎，加洋蔥、甘筍粒、菇菌粒炒熟。", "用生菜包住食。", "番薯蒸熟；雞蛋蒸水蛋。", "冬瓜、瘦肉煲45分鐘，少鹽。"], "ryan": "番薯代替飯；雞胸生菜包餡料可另盒裝。"}, {"id": 30, "title": "少油肉碎豆角＋番茄蛋＋灼小棠菜", "soup": "合掌瓜粟米紅蘿蔔瘦肉湯", "ingredients": ["免治瘦肉 250g", "豆角 1扎", "番茄 2個", "雞蛋 3隻", "小棠菜 1斤", "合掌瓜 1個", "紅蘿蔔 1條", "粟米 1條", "瘦肉少量"], "steps": ["豆角切粒，先炒熟，再加肉碎炒香，調味少少就好。", "番茄炒蛋。", "小棠菜灼熟。", "合掌瓜、粟米、紅蘿蔔、瘦肉煲45–60分鐘。"], "ryan": "豆角肉碎好容易撈飯，記得少汁；飯半碗至1碗。"}];
+const lunches = [{"id": 1, "title": "雞蛋番茄雞絲飯", "ingredients": ["雞胸", "番茄", "雞蛋", "菜心/生菜", "飯"], "steps": ["雞胸烚熟撕絲。", "番茄炒蛋。", "灼菜，配少量飯。"], "ryan": "飯半碗至1碗，菜放多啲。"}, {"id": 2, "title": "雞柳蕎麥麵", "ingredients": ["蕎麥麵", "雞柳", "青瓜", "甘筍", "蛋"], "steps": ["蕎麥麵煮熟過冷河。", "雞柳煎熟切條。", "青瓜甘筍切絲，醬汁另放。"], "ryan": "用少少低鹽豉油＋醋，麵一個拳頭份量。"}, {"id": 3, "title": "豆腐肉碎飯", "ingredients": ["硬豆腐", "免治瘦肉", "翠玉瓜", "飯"], "steps": ["肉碎少油炒熟。", "加豆腐同少量水炆。", "翠玉瓜炒熟。"], "ryan": "豆腐汁唔好太多，避免撈飯食多咗。"}, {"id": 4, "title": "雞扒番薯碟", "ingredients": ["去皮雞扒", "番薯", "西蘭花", "車厘茄"], "steps": ["雞扒用黑椒蒜蓉煎/焗。", "番薯蒸熟。", "西蘭花灼熟，配車厘茄。"], "ryan": "有番薯就唔使再食飯。"}, {"id": 5, "title": "蝦仁炒蛋飯", "ingredients": ["蝦仁", "雞蛋", "椰菜", "飯"], "steps": ["蝦仁炒蛋。", "椰菜少油炒。", "配少量飯。"], "ryan": "飯少啲，椰菜放半碟；唔食蝦可改雞粒。"}, {"id": 6, "title": "番茄雞肉全麥意粉", "ingredients": ["全麥意粉", "雞胸", "番茄", "洋蔥", "菇"], "steps": ["番茄洋蔥煮成醬。", "加雞肉粒和菇。", "拌全麥意粉。"], "ryan": "意粉一個拳頭份量，醬汁少啲。"}, {"id": 7, "title": "蒸水蛋瘦肉飯", "ingredients": ["雞蛋", "瘦肉碎", "白菜/娃娃菜", "飯"], "steps": ["瘦肉碎加蛋液蒸熟。", "灼白菜或娃娃菜。", "配少量飯。"], "ryan": "好適合午餐，飯半碗至三分二碗。"}, {"id": 8, "title": "雞絲生菜包", "ingredients": ["雞胸", "生菜", "菇菌", "甘筍", "粟米少量"], "steps": ["雞胸切粒或撕絲。", "炒菇菌甘筍和少量粟米。", "用生菜包住食。"], "ryan": "粟米少量就好；可加半個番薯。"}, {"id": 9, "title": "瘦肉炒河粉少油版", "ingredients": ["河粉", "瘦肉片", "芽菜", "洋蔥", "菜心"], "steps": ["河粉少油炒。", "加入瘦肉、芽菜、洋蔥。", "另加一碟菜心。"], "ryan": "河粉份量少啲，菜心多啲；少豉油。"}, {"id": 10, "title": "雞蛋豆腐雜菜飯", "ingredients": ["豆腐", "雞蛋", "西蘭花", "甘筍", "飯"], "steps": ["豆腐切粒煎香或直接炒蛋。", "西蘭花甘筍灼熟。", "配少量飯。"], "ryan": "半碟菜＋豆腐蛋，飯少啲。"}, {"id": 11, "title": "雞肉粟米蛋花湯飯", "ingredients": ["雞肉粒", "粟米粒", "蛋", "菜", "飯"], "steps": ["雞肉粟米煮成清湯。", "落蛋花。", "另灼菜，配少量飯。"], "ryan": "湯唔好太鹹；有粟米，飯可以減少少。"}, {"id": 12, "title": "牛肉西蘭花飯", "ingredients": ["瘦牛肉", "西蘭花", "菇", "飯"], "steps": ["牛肉快炒。", "加入西蘭花菇菌炒熟。", "配少量飯。"], "ryan": "牛肉一掌心份量；一星期1次左右可以。"}, {"id": 13, "title": "雞柳三文治＋沙律", "ingredients": ["全麥包", "雞柳", "蛋", "生菜", "番茄", "青瓜"], "steps": ["雞柳煎熟。", "夾全麥包。", "旁邊加沙律。"], "ryan": "不用沙律醬，改少量乳酪/檸檬汁/黑椒。"}, {"id": 14, "title": "番茄豆腐湯通粉", "ingredients": ["通粉", "番茄", "豆腐", "雞蛋", "菜"], "steps": ["番茄煮湯。", "加豆腐、蛋、少量通粉。", "加入菜煮熟。"], "ryan": "通粉少啲，豆腐同菜多啲；湯底少鹽。"}, {"id": 15, "title": "雞胸雜菜炒飯少飯版", "ingredients": ["冷飯", "雞胸粒", "蛋", "甘筍", "青豆少量", "椰菜"], "steps": ["用少飯多菜方法炒飯。", "加入雞胸粒和蛋。", "甘筍、青豆、椰菜炒熟。"], "ryan": "飯量控制，椰菜加多；唔好落叉燒/火腿。"}, {"id": 16, "title": "肉碎茄子飯少油版", "ingredients": ["茄子", "免治瘦肉", "菜心", "飯"], "steps": ["茄子先蒸軟。", "加肉碎少油炆。", "灼菜心配少量飯。"], "ryan": "茄子吸油，千祈唔好炸；汁少啲。"}, {"id": 17, "title": "雞肉南瓜飯碗", "ingredients": ["雞肉粒", "南瓜", "菇", "菜", "飯"], "steps": ["南瓜蒸熟。", "雞肉菇菌炒熟。", "配灼菜和少量飯。"], "ryan": "南瓜有澱粉，飯減到半碗。"}, {"id": 18, "title": "烚蛋雞絲沙律碗", "ingredients": ["雞胸", "雞蛋", "青瓜", "生菜", "車厘茄", "粟米少量"], "steps": ["雞胸烚熟撕絲。", "蛋烚熟。", "所有材料放一碗。"], "ryan": "可加半片全麥包或半條番薯，唔好落甜沙律醬。"}, {"id": 19, "title": "瘦肉白菜湯米粉", "ingredients": ["米粉", "瘦肉片", "白菜", "菇"], "steps": ["清水/自家清湯煮米粉。", "加瘦肉白菜菇煮熟。"], "ryan": "米粉少啲，菜多啲；湯唔好飲晒。"}, {"id": 20, "title": "雞肉豆腐飯盒", "ingredients": ["雞胸/雞柳", "豆腐", "娃娃菜", "番茄", "飯"], "steps": ["雞肉同豆腐番茄炆。", "娃娃菜灼熟。", "配少量飯。"], "ryan": "好飽肚，飯可以半碗至三分二碗。"}];
+
+function load(key, fallback){ try{return JSON.parse(localStorage.getItem(key)) ?? fallback}catch(e){return fallback} }
+function save(key, value){ localStorage.setItem(key, JSON.stringify(value)); }
+
+let drawnDinner = load('ryan_drawn_dinner', []);
+let drawnLunch = load('ryan_drawn_lunch', []);
+let historyList = load('ryan_meal_history', []);
+
+function remaining(list, drawn){ return list.filter(x => !drawn.includes(x.id)); }
+function pickRandom(list){ return list[Math.floor(Math.random()*list.length)]; }
+
+function renderCard(meal, type){
+  const card = document.createElement('div');
+  card.className = 'card drawn';
+  const soupHtml = meal.soup ? `<div class="soup">🥣 湯水：${escapeHtml(meal.soup)}</div>` : '';
+  card.innerHTML = `
+    <span class="number">${type === 'dinner' ? '🌙 晚餐' : '☀️ 午餐'} #${meal.id}</span>
+    <div class="meal-title">${escapeHtml(meal.title)}</div>
+    ${soupHtml}
+    <div class="section">
+      <h3>🛒 當日材料</h3>
+      <ul>${meal.ingredients.map(i=>`<li>${escapeHtml(i)}</li>`).join('')}</ul>
+    </div>
+    <div class="section">
+      <h3>👩🏻‍🍳 簡單做法</h3>
+      <ol>${meal.steps.map(s=>`<li>${escapeHtml(s)}</li>`).join('')}</ol>
+    </div>
+    <div class="tip">💚 Ryan 提示：${escapeHtml(meal.ryan)}</div>
+  `;
+  return card;
+}
+
+function drawDinner(){
+  let pool = remaining(dinners, drawnDinner);
+  if(pool.length === 0){ drawnDinner = []; pool = dinners; }
+  const meal = pickRandom(pool);
+  drawnDinner.push(meal.id);
+  save('ryan_drawn_dinner', drawnDinner);
+  addHistory('晚餐', meal.title);
+  const holder = document.getElementById('dinner-card');
+  holder.replaceWith(renderCard(meal, 'dinner'));
+  document.querySelector('.dinner .card, .dinner .empty').id = 'dinner-card';
+  updateCounts();
+}
+
+function drawLunch(){
+  let pool = remaining(lunches, drawnLunch);
+  if(pool.length === 0){ drawnLunch = []; pool = lunches; }
+  const meal = pickRandom(pool);
+  drawnLunch.push(meal.id);
+  save('ryan_drawn_lunch', drawnLunch);
+  addHistory('午餐', meal.title);
+  const holder = document.getElementById('lunch-card');
+  holder.replaceWith(renderCard(meal, 'lunch'));
+  document.querySelector('.lunch .card, .lunch .empty').id = 'lunch-card';
+  updateCounts();
+}
+
+function drawBoth(){ drawDinner(); setTimeout(drawLunch, 180); }
+
+function resetDraws(){
+  drawnDinner = []; drawnLunch = []; historyList = [];
+  save('ryan_drawn_dinner', drawnDinner);
+  save('ryan_drawn_lunch', drawnLunch);
+  save('ryan_meal_history', historyList);
+  document.getElementById('dinner-card').outerHTML = `<div id="dinner-card" class="empty"><div><strong>今晚煮乜好？</strong>撳「只抽晚餐」或「一次抽晒」</div></div>`;
+  document.getElementById('lunch-card').outerHTML = `<div id="lunch-card" class="empty"><div><strong>放假 Lunch 食乜？</strong>撳「只抽午餐」或「一次抽晒」</div></div>`;
+  updateCounts(); renderHistory();
+}
+
+function addHistory(type,title){
+  historyList.unshift(`${type}｜${title}`);
+  historyList = historyList.slice(0,10);
+  save('ryan_meal_history', historyList);
+  renderHistory();
+}
+
+function renderHistory(){
+  const box = document.getElementById('history-pills');
+  if(historyList.length === 0){ box.innerHTML = '<span class="pill">未開始抽卡</span>'; return; }
+  box.innerHTML = historyList.map(h=>`<span class="pill">${escapeHtml(h)}</span>`).join('');
+}
+
+function updateCounts(){
+  document.getElementById('dinner-count').textContent = `剩餘 ${remaining(dinners, drawnDinner).length}/${dinners.length}`;
+  document.getElementById('lunch-count').textContent = `剩餘 ${remaining(lunches, drawnLunch).length}/${lunches.length}`;
+}
+
+function toggleLibrary(){
+  const lib = document.getElementById('library');
+  lib.classList.toggle('show');
+  if(lib.classList.contains('show') && !document.getElementById('library-grid').dataset.loaded){
+    renderLibrary();
+  }
+  if(lib.classList.contains('show')) lib.scrollIntoView({behavior:'smooth'});
+}
+
+function renderLibrary(){
+  const grid = document.getElementById('library-grid');
+  const dinnerCards = dinners.map(m => miniCard(m,'晚餐'));
+  const lunchCards = lunches.map(m => miniCard(m,'午餐'));
+  grid.innerHTML = dinnerCards.concat(lunchCards).join('');
+  grid.dataset.loaded = '1';
+}
+
+function miniCard(m,type){
+  const soup = m.soup ? `<p><b>湯：</b>${escapeHtml(m.soup)}</p>` : '';
+  return `<div class="mini-card">
+    <h4>${type} #${m.id}｜${escapeHtml(m.title)}</h4>
+    ${soup}
+    <p><b>材料：</b>${escapeHtml(m.ingredients.join('、'))}</p>
+    <p><b>Ryan：</b>${escapeHtml(m.ryan)}</p>
+  </div>`;
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
+updateCounts(); renderHistory();
+</script>
+</body>
+</html>
